@@ -24,7 +24,7 @@ const PRINTER_PRESETS = [
   {
     id: "a1_mini",
     name: "Bambu Lab A1 Mini (c/ ou s/ AMS)",
-    powerW: 95,
+    powerW: 110,
     machinePrice: 3391.02,
     lifespanHours: 5000,
     maintenancePct: 10,
@@ -145,6 +145,7 @@ export default function App() {
   const [selectedPrinter, setSelectedPrinter] = useState("a1_mini");
   const [printHours, setPrintHours] = useState("");
   const [printMinutes, setPrintMinutes] = useState("");
+  const [printSeconds, setPrintSeconds] = useState("");
   const [printerWatts, setPrinterWatts] = useState(110);
   const [kwhRate, setKwhRate] = useState(1.15); // Tarifa de energia R$/kWh
   const [machinePrice, setMachinePrice] = useState(3391.02);
@@ -289,7 +290,8 @@ export default function App() {
     // 2. Tempo Total de Impressão em Horas
     const totalPrintHours =
       Math.max(0, Number(printHours) || 0) +
-      Math.max(0, Number(printMinutes) || 0) / 60;
+      Math.max(0, Number(printMinutes) || 0) / 60 +
+      Math.max(0, Number(printSeconds) || 0) / 3600;
 
     // 3. Custo de Energia Elétrica: (Watts / 1000) * Horas * Tarifa kWh
     const kwhConsumed =
@@ -466,6 +468,7 @@ export default function App() {
     purgeWeightGrams,
     printHours,
     printMinutes,
+    printSeconds,
     printerWatts,
     kwhRate,
     machinePrice,
@@ -503,7 +506,7 @@ export default function App() {
       directPrice: calculations.directSuggestedPrice,
       shopeePrice: calculations.shopeeSuggestedPrice,
       profit: calculations.directNetProfit,
-      time: `${printHours}h ${printMinutes}min`,
+      time: `${printHours}h ${printMinutes}min ${Number(printSeconds) || 0}s`,
       settings: {
         projectName,
         batchQuantity,
@@ -516,6 +519,7 @@ export default function App() {
         selectedPrinter,
         printHours,
         printMinutes,
+        printSeconds,
         printerWatts,
         kwhRate,
         machinePrice,
@@ -575,6 +579,7 @@ export default function App() {
     setSelectedPrinter(settings.selectedPrinter);
     setPrintHours(settings.printHours);
     setPrintMinutes(settings.printMinutes);
+    setPrintSeconds(settings.printSeconds ?? "");
     setPrinterWatts(settings.printerWatts);
     setKwhRate(settings.kwhRate);
     setMachinePrice(settings.machinePrice);
@@ -659,7 +664,7 @@ export default function App() {
         `Projeto: ${projectName} (${calculations.validBatch} un)\n` +
         `----------------------------------\n` +
         `• Filamento (${filamentMode === "bambu" ? "Bambu Studio" : "Peso"}): ${formatBRL(calculations.filamentCost)}\n` +
-        `• Energia (${printHours}h${printMinutes}m): ${formatBRL(calculations.energyCost)}\n` +
+        `• Energia (${printHours}h${printMinutes}m${Number(printSeconds) || 0}s): ${formatBRL(calculations.energyCost)}\n` +
         `• Máquina + Manutenção: ${formatBRL(calculations.machineCost)}\n` +
         `• Margem de Falha (${failureRatePct}%): ${formatBRL(calculations.failureCost)}\n` +
         `• Mão de Obra Pré (${prePrintMinutes} min): ${formatBRL(calculations.prePrintCost)}\n` +
@@ -1226,7 +1231,7 @@ export default function App() {
                   <label className="block text-xs font-semibold text-cyan-300 mb-2 flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5" /> Tempo de Impressão
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <div>
                       <div className="relative">
                         <input
@@ -1253,6 +1258,21 @@ export default function App() {
                         />
                         <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-slate-400">
                           min
+                        </span>
+                      </div>
+                    </div>
+                    <div>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          min="0"
+                          max="59"
+                          value={printSeconds}
+                          onChange={(e) => setPrintSeconds(e.target.value)}
+                          className="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-sm font-bold text-white outline-none"
+                        />
+                        <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-slate-400">
+                          seg
                         </span>
                       </div>
                     </div>
